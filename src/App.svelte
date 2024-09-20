@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Counter from "./lib/Counter.svelte";
   import Players from "./lib/Players.svelte";
 </script>
 

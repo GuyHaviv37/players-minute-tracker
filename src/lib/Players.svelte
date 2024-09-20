@@ -12,6 +12,42 @@
     // State to track if the game has started
     let gameStarted = false;
 
+    import { onMount, onDestroy } from "svelte";
+
+    let updateInterval: number;
+
+    // Function to start periodic updates for reactivity
+    function startPeriodicUpdates(): void {
+        updateInterval = setInterval(() => {
+            const now = Date.now();
+            players = players.map((player) => {
+                if (
+                    selectedPlayers.includes(player.name) &&
+                    player.startTimestamp
+                ) {
+                    player.timer += (now - player.startTimestamp) / 1000;
+                    player.startTimestamp = now;
+                }
+                return player;
+            });
+        }, 100); // Update UI every 100ms
+    }
+
+    // Stop periodic updates when not needed
+    function stopPeriodicUpdates(): void {
+        clearInterval(updateInterval);
+    }
+
+    // Start periodic updates when component is mounted
+    onMount(() => {
+        startPeriodicUpdates();
+    });
+
+    // Clean up when the component is destroyed
+    onDestroy(() => {
+        stopPeriodicUpdates();
+    });
+
     // Function to add a player to the list
     function addPlayer(): void {
         if (
