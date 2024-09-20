@@ -126,8 +126,8 @@
         {#each playerStatus as { name, selected, startTimestamp, timer }}
             <div class="player-item">
                 <span class:selected>{name}</span>
-                <span class="timer"
-                    >{Math.floor(timer / 60)}:{(timer % 60)
+                <span class="timer">
+                    {Math.floor(timer / 60)}:{(timer % 60)
                         .toFixed(1)
                         .padStart(4, "0")}
                 </span>
