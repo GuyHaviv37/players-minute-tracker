@@ -1,8 +1,8 @@
 <script lang="ts">
     interface Player {
         name: string;
-        timer: number; // Timer value in seconds
-        interval?: number; // Optional reference to the interval for clearing
+        timer: number; // Cumulative time in seconds
+        startTimestamp?: number; // Stores the timestamp when the timer started
     }
 
     let players: Player[] = [];
@@ -42,24 +42,27 @@
 
     // Function to start timers for selected players
     function startTimers(): void {
-        players.forEach((player) => {
-            if (selectedPlayers.includes(player.name) && !player.interval) {
-                player.interval = setInterval(async () => {
-                    player.timer += 0.1;
-                    players = [...players]; // Reassigning to trigger reactivity
-                    await tick(); // Ensures the DOM updates
-                }, 100);
+        const now = Date.now();
+        players = players.map((player) => {
+            if (selectedPlayers.includes(player.name)) {
+                player.startTimestamp = now;
             }
+            return player;
         });
     }
 
     // Function to stop timers for all players
     function stopTimers(): void {
-        players.forEach((player) => {
-            if (player.interval) {
-                clearInterval(player.interval);
-                player.interval = undefined;
+        const now = Date.now();
+        players = players.map((player) => {
+            if (
+                selectedPlayers.includes(player.name) &&
+                player.startTimestamp
+            ) {
+                player.timer += (now - player.startTimestamp) / 1000;
+                player.startTimestamp = undefined;
             }
+            return player;
         });
     }
 
@@ -82,12 +85,6 @@
         ...player,
         selected: selectedPlayers.includes(player.name),
     }));
-
-    // Clean up intervals on component destroy
-    import { onDestroy, tick } from "svelte";
-    onDestroy(() => {
-        stopTimers(); // Stop all timers on destroy
-    });
 
     function exportToCSV(): void {
         const headers = ["Player Name", "Timer"];
@@ -126,14 +123,14 @@
     {/if}
 
     <div class="player-list">
-        {#each playerStatus as { name, selected, timer }}
+        {#each playerStatus as { name, selected, startTimestamp, timer }}
             <div class="player-item">
                 <span class:selected>{name}</span>
                 <span class="timer"
                     >{Math.floor(timer / 60)}:{(timer % 60)
                         .toFixed(1)
-                        .padStart(4, "0")}</span
-                >
+                        .padStart(4, "0")}
+                </span>
                 <button
                     class="button"
                     on:click={() => toggleSelection(name)}
