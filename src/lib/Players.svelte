@@ -63,6 +63,14 @@
         }
     }
 
+    function removePlayer(playerName: string): void {
+        const trimmedName = playerName.trim();
+        players = players.filter((player) => player.name !== trimmedName);
+        selectedPlayers = selectedPlayers.filter(
+            (selectedPlayer) => selectedPlayer === playerName,
+        );
+    }
+
     // Function to toggle selection of players
     function toggleSelection(playerName: string): void {
         if (!gameStarted) {
@@ -161,6 +169,11 @@
     <div class="player-list">
         {#each playerStatus as { name, selected, startTimestamp, timer }}
             <div class="player-item">
+                <button
+                    class="circled danger"
+                    disabled={gameStarted}
+                    on:click={() => removePlayer(name)}>{"X"}</button
+                >
                 <span class:selected>{name}</span>
                 <span class="timer">
                     {Math.floor(timer / 60)}:{(timer % 60)
@@ -222,6 +235,15 @@
     .button {
         padding: 5px 10px;
         cursor: pointer;
+    }
+
+    .danger {
+        color: red;
+    }
+
+    .circled {
+        border-radius: 50%;
+        padding: 0 0.5rem;
     }
 
     .button:disabled {
